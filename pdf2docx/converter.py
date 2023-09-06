@@ -2,6 +2,7 @@
 import json
 import logging
 import os
+from collections import Counter
 from multiprocessing import Pool, cpu_count
 from time import perf_counter
 from typing import AnyStr, IO, Union
@@ -304,6 +305,21 @@ class Converter:
                     logging.error('Ignore page %d due to making page error: %s', pid, e)
                 else:
                     raise MakedocxException(f'Error when make page {pid}: {e}')
+                
+        # remove header and footer
+        header_texts = Counter()
+        for page in body:
+            first_paragraph = page.find('.//p')
+            if first_paragraph is not None:
+                text = first_paragraph.xpath("string()").strip()
+                header_texts[text] += 1
+
+        for text, count in header_texts.items():
+            if count >= num_pages / 2:
+                for page in body:
+                    first_paragraph = page.find('.//p')
+                    if first_paragraph is not None and first_paragraph.xpath("string()").strip() == text:
+                        first_paragraph.getparent().remove(first_paragraph)
 
         # save html
         if template_file:
