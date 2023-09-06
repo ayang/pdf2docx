@@ -144,6 +144,38 @@ class TableBlock(Block):
                 if not cell: continue
                 cell.parse(**settings)
 
+    
+    def clean_empty_rows_cols(self):
+        # delete this method if not used
+        empty_rows = []
+        empty_cols = []
+        for i in range(self.num_rows):
+            row_empty = True
+            row = self[i]
+            for cell in row:
+                print(cell.text, cell.bbox[2] - cell.bbox[0], cell.bbox[3] - cell.bbox[1])
+                if cell.bbox[2] - cell.bbox[0] > 10 or cell.text and cell.text.strip():
+                    row_empty = False
+                    break
+            if row_empty:
+                empty_rows.append(i)
+        for j in range(self.num_cols):
+            col_empty = True
+            for i in range(self.num_rows):
+                cell = self[i][j]
+                if cell.bbox[3] - cell.bbox[1] > 10 or cell.text and cell.text.strip():
+                    col_empty = False
+                    break
+            if col_empty:
+                empty_cols.append(j)
+        print(f'Empty rows: {empty_rows}')
+        print(f'Empty cols: {empty_cols}')
+        for i in sorted(empty_rows, reverse=True):
+            self._rows.pop(i)
+        for j in sorted(empty_cols, reverse=True):
+            for row in self._rows:
+                row._cells.pop(j)
+
 
     def plot(self, page):
         '''Plot table block, i.e. cell/line/span, for debug purpose.
@@ -175,5 +207,6 @@ class TableBlock(Block):
 
 
     def make_html(self, table):
+        # self.clean_empty_rows_cols()
         for idx_row in range(self.num_rows):
             self._rows[idx_row].make_html(table, idx_row)
