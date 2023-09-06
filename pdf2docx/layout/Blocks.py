@@ -6,6 +6,7 @@ and a combination of ``Line`` and ``TableBlock`` during parsing process.
 
 import logging
 from docx.shared import Pt
+from lxml import etree
 from ..common import constants
 from ..common.Collection import ElementCollection
 from ..common.share import (BlockType, lower_round, rgb_value)
@@ -354,6 +355,34 @@ class Blocks(ElementCollection):
             # otherwise, add a small paragraph
             p = doc.add_paragraph()
             reset_paragraph_format(p, Pt(constants.MIN_LINE_SPACING)) # a small line height
+
+
+    def make_html(self, doc):
+        '''Create page based on parsed block structure. 
+        
+        Args:
+            doc (etree.Element): ``lxml`` Element object
+        '''
+        def make_table(table_block, pre_table):
+            # new table            
+            table = etree.SubElement(doc, 'table')
+            table_block.make_html(table)
+
+        pre_table = False
+        cell_layout = isinstance(self.parent, Cell)
+        for block in self._instances:
+            # make paragraphs
+            if block.is_text_image_block:                
+                # new paragraph
+                p = etree.SubElement(doc, 'p')
+                block.make_html(p)
+
+                pre_table = False # mark block type
+            
+            # make table
+            elif block.is_table_block:
+                make_table(block, pre_table)
+                pre_table = True # mark block type
 
   
     def plot(self, page):

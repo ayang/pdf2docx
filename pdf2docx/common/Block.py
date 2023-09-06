@@ -142,3 +142,7 @@ class Block(Element):
             NotImplementedError
         """
         raise NotImplementedError
+    
+
+    def make_html(self, *args, **kwargs):
+        raise NotImplementedError

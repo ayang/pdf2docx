@@ -5,6 +5,7 @@
 
 from docx.enum.table import WD_ROW_HEIGHT
 from docx.shared import Pt
+from lxml import etree
 from .Cells import Cells
 from ..common.Element import Element
 
@@ -73,3 +74,11 @@ class Row(Element):
         # set cell style and contents
         for idx_col in range(len(table.columns)):
             self._cells[idx_col].make_docx(table, (idx_row, idx_col))
+
+    
+    def make_html(self, table, idx_row:int):
+        '''Create row of html table.'''
+        row = etree.SubElement(table, 'tr')
+        # set cell style and contents
+        for idx_col in range(len(self)):
+            self._cells[idx_col].make_html(row, (idx_row, idx_col))

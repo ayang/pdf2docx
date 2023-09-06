@@ -21,6 +21,7 @@ try:
 except ImportError:
     # Python > 3.9
     from collections.abc import Iterable
+from lxml import etree
 from .TextSpan import TextSpan
 from ..common.Element import Element
 from ..common.share import TextDirection
@@ -176,4 +177,12 @@ class Line(Element):
 
         # line break
         if self.line_break: p.add_run('\n')
-            
+
+
+    def make_html(self, p):
+        '''Create html line.'''
+        # create span -> run in paragraph
+        for span in self.spans: span.make_html(p)            
+
+        # line break
+        if self.line_break: etree.SubElement(p, 'br')

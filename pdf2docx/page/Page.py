@@ -41,6 +41,7 @@ Page elements structure:
 
 from docx.shared import Pt
 from docx.enum.section import WD_SECTION
+from lxml import etree
 from ..common.Collection import BaseCollection
 from ..common.share import debug_plot
 from .BasePage import BasePage
@@ -202,6 +203,24 @@ class Page(BasePage):
         self.sections.make_docx(doc)
 
  
+    def make_html(self, doc):
+        '''Set page size, margin, and create page. 
+
+        .. note::
+            Before running this method, the page layout must be either parsed from source 
+            page or restored from parsed data.
+        
+        Args:
+            doc (etree.Element): ``lxml`` Element object
+        '''
+        # new page
+        page = etree.SubElement(doc, 'div', {'class': 'pdf-page', 'id': f'page-{self.id}'})
+        # section = etree.SubElement(page, 'div', {'class': 'section'})
+
+        # create flow layout: sections
+        self.sections.make_html(page)
+
+
     def _restore_float_images(self, raws:list):
         '''Restore float images.'''
         self.float_images.reset()

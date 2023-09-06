@@ -27,6 +27,7 @@ Data structure based on this `link <https://pymupdf.readthedocs.io/en/latest/tex
 
 from docx.shared import (Pt,Inches)
 from docx.enum.text import WD_ALIGN_PARAGRAPH
+from lxml import etree
 from .Lines import Lines
 from ..image.ImageSpan import ImageSpan
 from ..common.share import (RectType, TextAlignment, lower_round)
@@ -367,6 +368,10 @@ class TextBlock(Block):
 
         return p
 
+
+    def make_html(self, p):
+        for line in self.lines: line.make_html(p)
+        return p
 
 
     def _parse_alignment(self, bbox,

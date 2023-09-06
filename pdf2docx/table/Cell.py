@@ -4,6 +4,7 @@
 '''
 
 from docx.shared import Pt
+from lxml import etree
 from ..common.Element import Element
 from ..layout.Layout import Layout
 from ..common import docx
@@ -98,6 +99,32 @@ class Cell(Element, Layout):
         if self.blocks:
             docx_cell._element.clear_content()
             self.blocks.make_docx(docx_cell)
+
+
+    def make_html(self, row, indexes):
+        '''Set cell style and assign contents.
+        
+        Args:
+            row (Element): ``lxml`` Element instance.
+            indexes (tuple): Row and column indexes, ``(i, j)``.
+        '''        
+        # set cell style, e.g. border, shading, cell width
+        # self._set_style(table, indexes)
+        
+        # ignore merged cells
+        if not bool(self):  return
+
+        # merge cells
+        n_row, n_col = self.merged_cells
+        i, j = indexes
+        docx_cell = etree.SubElement(row, 'td')
+        if n_row != 1:
+            docx_cell.set('rowspan', str(n_row))
+        if n_col != 1:
+            docx_cell.set('colspan', str(n_col))
+        
+        if self.blocks:
+            self.blocks.make_html(docx_cell)
 
 
     def _set_style(self, table, indexes):

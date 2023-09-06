@@ -41,6 +41,38 @@ class PDF2DOCX:
     
 
     @staticmethod
+    def convert_html(pdf_file:str, html_file:str=None, password:str=None, start:int=0, end:int=None, pages:list=None, **kwargs):
+        '''Convert pdf file to docx file.
+        
+        Args:
+            pdf_file (str) : PDF filename to read from.
+            html_file (str, optional): html filename to write to. Defaults to None.
+            password (str): Password for encrypted pdf. Default to None if not encrypted.
+            start (int, optional): First page to process. Defaults to 0.
+            end (int, optional): Last page to process. Defaults to None.
+            pages (list, optional): Range of pages, e.g. --pages=1,3,5. Defaults to None.
+            kwargs (dict) : Configuration parameters.
+        
+        .. note::
+            Refer to :py:meth:`~pdf2docx.converter.Converter.convert` for detailed description on above arguments.
+        '''
+        # index starts from zero or one
+        if isinstance(pages, int): pages = [pages] # in case --pages=1
+        if not kwargs.get('zero_based_index', True):
+            start = max(start-1, 0)
+            if end: end -= 1
+            if pages: pages = [i-1 for i in pages]
+
+        cv = Converter(pdf_file, password)
+        try:
+            cv.convert_html(html_file, start, end, pages, **kwargs)
+        except Exception as e:
+            logging.error(e)
+        finally:
+            cv.close()
+
+
+    @staticmethod
     def debug(pdf_file:str, password:str=None, page:int=0, docx_file:str=None, debug_pdf:str=None, layout_file:str='layout.json', **kwargs):
         '''Convert one PDF page and plot layout information for debugging.
         

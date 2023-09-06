@@ -79,3 +79,7 @@ class ImageBlock(Image, Block):
         else:
             super().make_docx(p)
         return p
+    
+
+    def make_html(self, p):
+        return p

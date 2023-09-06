@@ -21,6 +21,7 @@ to distinguish these different layouts.
 '''
 
 from docx.enum.section import WD_SECTION
+from lxml import etree
 from ..common.docx import set_columns
 from ..common.Collection import BaseCollection
 from .Column import Column
@@ -95,3 +96,15 @@ class Section(BaseCollection):
 
             # make doc
             column.make_docx(doc)
+
+    
+    def make_html(self, doc):
+        '''Create section in docx. 
+
+        Args:
+            doc (etree.Element): ``lxml`` Element object
+        '''
+        # create section
+        section = etree.SubElement(doc, 'div', {'class': 'section'})
+        for column in self:
+            column.make_html(section)

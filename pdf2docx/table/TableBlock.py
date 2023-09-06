@@ -172,3 +172,8 @@ class TableBlock(Block):
         # set format and contents row by row
         for idx_row in range(len(table.rows)):
             self._rows[idx_row].make_docx(table, idx_row)
+
+
+    def make_html(self, table):
+        for idx_row in range(self.num_rows):
+            self._rows[idx_row].make_html(table, idx_row)

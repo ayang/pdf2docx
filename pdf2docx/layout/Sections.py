@@ -83,6 +83,18 @@ class Sections(BaseCollection):
             image.make_docx(doc.paragraphs[n])
 
 
+    def make_html(self, doc):
+        '''create sections in html.'''
+        if not self: return
+
+        # ---------------------------------------------------
+        # create sections
+        # ---------------------------------------------------
+        for section in self:
+            # section content
+            section.make_html(doc)
+
+
     def plot(self, page):
         '''Plot all section blocks for debug purpose.'''
         for section in self: 

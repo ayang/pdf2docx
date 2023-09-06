@@ -32,6 +32,7 @@ this `link <https://pymupdf.readthedocs.io/en/latest/textpage.html>`_::
 import fitz
 from docx.shared import Pt, RGBColor
 from docx.oxml.ns import qn
+from lxml import etree
 from .Char import Char
 from ..common.Element import Element
 from ..common.share import RectType
@@ -382,6 +383,14 @@ class TextSpan(Element):
         # set charters spacing
         if self.char_spacing: 
             docx.set_char_spacing(docx_run, self.char_spacing)
+
+    
+    def make_html(self, paragraph):
+        etree.SubElement(paragraph, 'span', {'style': self._get_html_style()}).text = self.text
+
+
+    def _get_html_style(self):
+        return ''
 
 
     def _set_text_format(self, docx_run):
