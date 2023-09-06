@@ -273,7 +273,6 @@ class Converter:
             if not page.finalized: continue # ignore unparsed pages
             pid = page.id + 1
             logging.info('(%d/%d) Page %d', i, num_pages, pid)
-            page.make_html(body)
             try:
                 page.make_html(body)
             except Exception as e:
@@ -284,10 +283,10 @@ class Converter:
 
         # save html
         if hasattr(html_filename, 'write'):
-            etree.dump(body)
             html_filename.write(etree.tostring(body, pretty_print=True))
-        with open(html_filename, 'wb') as f:
-            f.write(etree.tostring(body, pretty_print=True))
+        else:
+            with open(html_filename, 'wb') as f:
+                f.write(etree.tostring(body, pretty_print=True))
 
 
     # -----------------------------------------------------------------------
