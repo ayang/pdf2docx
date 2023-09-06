@@ -371,18 +371,27 @@ class Blocks(ElementCollection):
         pre_table = False
         cell_layout = isinstance(self.parent, Cell)
         for block in self._instances:
-            # make paragraphs
-            if block.is_text_image_block:                
-                # new paragraph
-                p = etree.SubElement(doc, 'p')
-                block.make_html(p)
+            if doc.tag == 'td':
+                # prevent table in table
+                if block.is_text_image_block:
+                    block.make_html(doc)
+                    etree.SubElement(doc, 'br')
+                elif block.is_table_block:
+                    etree.SubElement(doc, 'span').text = ''.join([''.join(row) for row in block.text])
+                    etree.SubElement(doc, 'br')
+            else:
+                # make paragraphs
+                if block.is_text_image_block:                
+                    # new paragraph
+                    p = etree.SubElement(doc, 'p')
+                    block.make_html(p)
 
-                pre_table = False # mark block type
-            
-            # make table
-            elif block.is_table_block:
-                make_table(block, pre_table)
-                pre_table = True # mark block type
+                    pre_table = False # mark block type
+                
+                # make table
+                elif block.is_table_block:
+                    make_table(block, pre_table)
+                    pre_table = True # mark block type
 
   
     def plot(self, page):
