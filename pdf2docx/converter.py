@@ -22,6 +22,29 @@ logging.basicConfig(
     level=logging.INFO, 
     format="[%(levelname)s] %(message)s")
 
+# default html template
+default_html_template = '''
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        table {
+            border-collapse: collapse;
+            border: 1px solid black;
+        }
+        td {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+    {{body}}
+</body>
+</html>
+'''
+        
+
 
 class Converter:
     '''The ``PDF`` to ``docx`` converter.
@@ -105,7 +128,8 @@ class Converter:
             'extract_stream_table'           : False,  # don't consider stream table when extracting tables
             'parse_lattice_table'            : True,   # whether parse lattice table or not; may destroy the layout if set False
             'parse_stream_table'             : True,   # whether parse stream table or not; may destroy the layout if set False
-            'delete_end_line_hyphen'         : False   # delete hyphen at the end of a line
+            'delete_end_line_hyphen'         : False,  # delete hyphen at the end of a line
+            'template_file'                  : None,   # html template file
         }
 
     # -----------------------------------------------------------------------
@@ -237,7 +261,7 @@ class Converter:
         docx_file.save(filename)
 
 
-    def make_html(self, html_filename=None, **kwargs):
+    def make_html(self, html_filename=None, template_file=None, **kwargs):
         '''Step 4 of converting process: create html file with converted pages.
         
         Args:
@@ -282,11 +306,18 @@ class Converter:
                     raise MakedocxException(f'Error when make page {pid}: {e}')
 
         # save html
-        if hasattr(html_filename, 'write'):
-            html_filename.write(etree.tostring(body, pretty_print=True))
+        if template_file:
+            with open(template_file, 'r') as f:
+                template = f.read()
         else:
-            with open(html_filename, 'wb') as f:
-                f.write(etree.tostring(body, pretty_print=True))
+            template = default_html_template
+
+        html = template.replace('{{body}}', etree.tostring(body, pretty_print=True).decode('utf-8'))
+        if hasattr(html_filename, 'write'):
+            html_filename.write(html)
+        else:
+            with open(html_filename, 'w') as f:
+                f.write(html)
 
 
     # -----------------------------------------------------------------------
