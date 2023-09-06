@@ -365,7 +365,7 @@ class Blocks(ElementCollection):
         '''
         def make_table(table_block, pre_table):
             # new table            
-            table = etree.SubElement(doc, 'table')
+            table = etree.SubElement(doc, 'table', width='100%')
             table_block.make_html(table)
 
         pre_table = False

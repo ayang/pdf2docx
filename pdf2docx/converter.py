@@ -37,6 +37,10 @@ default_html_template = '''
         td {
             border: 1px solid black;
         }
+        .pdf-page {
+            margin-bottom: 1em;
+            border-bottom: 1px solid black;
+        }
     </style>
 </head>
 <body>
@@ -328,7 +332,7 @@ class Converter:
         else:
             template = default_html_template
 
-        html = template.replace('{{body}}', etree.tostring(body, pretty_print=True).decode('utf-8'))
+        html = template.replace('{{body}}', etree.tostring(body, pretty_print=True, encoding='unicode'))
         if hasattr(html_filename, 'write'):
             html_filename.write(html)
         else:
