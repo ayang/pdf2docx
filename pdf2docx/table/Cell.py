@@ -118,7 +118,7 @@ class Cell(Element, Layout):
         n_row, n_col = self.merged_cells
         i, j = indexes
         x0, y0, x1, y1 = self.bbox
-        rx0, _, rx1, _ = self.parent.bbox
+        rx0, _, rx1, _ = self.parent.parent.bbox
         cell_width = (x1-x0) / (rx1-rx0)
         docx_cell = etree.SubElement(row, 'td', {'width': f'{cell_width:.2%}'})
         if n_row != 1:

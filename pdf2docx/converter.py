@@ -336,7 +336,7 @@ class Converter:
         if hasattr(html_filename, 'write'):
             html_filename.write(html)
         else:
-            with open(html_filename, 'w') as f:
+            with open(html_filename, 'w', encoding='utf-8') as f:
                 f.write(html)
 
 
