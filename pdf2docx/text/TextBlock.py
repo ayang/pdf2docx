@@ -375,14 +375,15 @@ class TextBlock(Block):
         if self.alignment==TextAlignment.LEFT:
             styles.append('text-align:left')
         elif self.alignment==TextAlignment.RIGHT:
-            styles.append('text-align:right')
+            if self.right_space < 100:
+                styles.append('text-align:right')
         elif self.alignment==TextAlignment.CENTER:
             styles.append('text-align:center')
         elif self.alignment==TextAlignment.JUSTIFY:
             styles.append('text-align:justify')
-        if self.left_space>0:
+        if self.alignment!=TextAlignment.CENTER and self.left_space>0:
             styles.append('padding-left:%.1fpt' % self.left_space)
-        if self.right_space>0:
+        if self.alignment!=TextAlignment.CENTER and self.right_space>0 and self.right_space < 100:
             styles.append('padding-right:%.1fpt' % self.right_space)
         if self.first_line_space>0:
             styles.append('text-indent:%.1fpt' % self.first_line_space)

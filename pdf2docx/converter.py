@@ -266,6 +266,52 @@ class Converter:
         docx_file.save(filename)
 
 
+    def make_html_pages(self, **kwargs):
+        # check parsed pages
+        parsed_pages = list(filter(
+            lambda page: page.finalized, self._pages
+        ))
+        if not parsed_pages:
+            raise ConversionException('No parsed pages. Please parse page first.')
+
+        # create page by page        
+        num_pages = len(parsed_pages)
+        dom_pages = []
+        for i, page in enumerate(parsed_pages, start=1):
+            if not page.finalized: continue # ignore unparsed pages
+            pid = page.id + 1
+            logging.info('(%d/%d) Page %d', i, num_pages, pid)
+            try:
+                dom_pages.append(page.make_html())
+            except Exception as e:
+                if not kwargs['debug'] and kwargs['ignore_page_error']:
+                    logging.error('Ignore page %d due to making page error: %s', pid, e)
+                else:
+                    raise MakedocxException(f'Error when make page {pid}: {e}')
+
+        # remove header and footer
+        for i in range(3):
+            header_texts = Counter()
+            for page in dom_pages:
+                first_paragraph = page.find('.//p')
+                if first_paragraph is not None:
+                    text = first_paragraph.xpath("string()").strip()
+                    header_texts[text] += 1
+
+            for text, count in header_texts.items():
+                if count >= num_pages / 2:
+                    for page in dom_pages:
+                        first_paragraph = page.find('.//p')
+                        if first_paragraph is not None and first_paragraph.xpath("string()").strip() == text:
+                            parent = first_paragraph.getparent()
+                            parent.remove(first_paragraph)
+                            if parent.text is None:
+                                parent.text = ''
+
+        page_htmls = [etree.tostring(page, pretty_print=True, encoding='unicode') for page in dom_pages]
+        return page_htmls
+
+
     def make_html(self, html_filename=None, template_file=None, **kwargs):
         '''Step 4 of converting process: create html file with converted pages.
         
@@ -274,13 +320,6 @@ class Converter:
             kwargs (dict, optional): Configuration parameters. 
         '''
         logging.info(self._color_output('[4/4] Creating pages...'))
-
-        # check parsed pages
-        parsed_pages = list(filter(
-            lambda page: page.finalized, self._pages
-        ))
-        if not parsed_pages:
-            raise ConversionException('No parsed pages. Please parse page first.')
 
         if not html_filename:
             raise ConversionException(
@@ -295,35 +334,8 @@ class Converter:
             filename = html_filename or f'{self.filename_pdf[0:-len(".pdf")]}.html' if self.filename_pdf else "output.html"
             if os.path.exists(filename): os.remove(filename)
 
-        # create page by page        
-        body = etree.Element('body')
-        num_pages = len(parsed_pages)
-        for i, page in enumerate(parsed_pages, start=1):
-            if not page.finalized: continue # ignore unparsed pages
-            pid = page.id + 1
-            logging.info('(%d/%d) Page %d', i, num_pages, pid)
-            try:
-                page.make_html(body)
-            except Exception as e:
-                if not kwargs['debug'] and kwargs['ignore_page_error']:
-                    logging.error('Ignore page %d due to making page error: %s', pid, e)
-                else:
-                    raise MakedocxException(f'Error when make page {pid}: {e}')
-                
-        # remove header and footer
-        header_texts = Counter()
-        for page in body:
-            first_paragraph = page.find('.//p')
-            if first_paragraph is not None:
-                text = first_paragraph.xpath("string()").strip()
-                header_texts[text] += 1
-
-        for text, count in header_texts.items():
-            if count >= num_pages / 2:
-                for page in body:
-                    first_paragraph = page.find('.//p')
-                    if first_paragraph is not None and first_paragraph.xpath("string()").strip() == text:
-                        first_paragraph.getparent().remove(first_paragraph)
+        # create page by page
+        page_htmls = self.make_html_pages(**kwargs)
 
         # save html
         if template_file:
@@ -332,7 +344,7 @@ class Converter:
         else:
             template = default_html_template
 
-        html = template.replace('{{body}}', etree.tostring(body, pretty_print=True, encoding='unicode'))
+        html = template.replace('{{body}}', '\n'.join(page_htmls))
         if hasattr(html_filename, 'write'):
             html_filename.write(html)
         else:

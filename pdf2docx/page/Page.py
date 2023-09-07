@@ -203,7 +203,7 @@ class Page(BasePage):
         self.sections.make_docx(doc)
 
  
-    def make_html(self, doc):
+    def make_html(self, doc=None):
         '''Set page size, margin, and create page. 
 
         .. note::
@@ -214,11 +214,14 @@ class Page(BasePage):
             doc (etree.Element): ``lxml`` Element object
         '''
         # new page
-        page = etree.SubElement(doc, 'div', {'class': 'pdf-page', 'id': f'page-{self.id}'})
+        page = etree.Element('div', {'class': 'pdf-page', 'id': f'page-{self.id}'})
+        if doc is not None:
+            doc.append(page)
         # section = etree.SubElement(page, 'div', {'class': 'section'})
 
         # create flow layout: sections
         self.sections.make_html(page)
+        return page
 
 
     def _restore_float_images(self, raws:list):
