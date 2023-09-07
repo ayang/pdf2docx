@@ -371,6 +371,23 @@ class TextBlock(Block):
 
     def make_html(self, p):
         for line in self.lines: line.make_html(p)
+        styles = []
+        if self.alignment==TextAlignment.LEFT:
+            styles.append('text-align:left')
+        elif self.alignment==TextAlignment.RIGHT:
+            styles.append('text-align:right')
+        elif self.alignment==TextAlignment.CENTER:
+            styles.append('text-align:center')
+        elif self.alignment==TextAlignment.JUSTIFY:
+            styles.append('text-align:justify')
+        if self.left_space>0:
+            styles.append('padding-left:%.1fpt' % self.left_space)
+        if self.right_space>0:
+            styles.append('padding-right:%.1fpt' % self.right_space)
+        if self.first_line_space>0:
+            styles.append('text-indent:%.1fpt' % self.first_line_space)
+        if len(styles)>0:
+            p.set('style', ';'.join(styles))
         return p
 
 
