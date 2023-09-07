@@ -76,9 +76,9 @@ class Row(Element):
             self._cells[idx_col].make_docx(table, (idx_row, idx_col))
 
     
-    def make_html(self, table, idx_row:int):
+    def make_html(self, table, idx_row:int, **kwargs):
         '''Create row of html table.'''
         row = etree.SubElement(table, 'tr')
         # set cell style and contents
         for idx_col in range(len(self)):
-            self._cells[idx_col].make_html(row, (idx_row, idx_col))
+            self._cells[idx_col].make_html(row, (idx_row, idx_col), **kwargs)

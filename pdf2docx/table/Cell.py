@@ -101,7 +101,7 @@ class Cell(Element, Layout):
             self.blocks.make_docx(docx_cell)
 
 
-    def make_html(self, row, indexes):
+    def make_html(self, row, indexes, **kwargs):
         '''Set cell style and assign contents.
         
         Args:
@@ -127,7 +127,7 @@ class Cell(Element, Layout):
             docx_cell.set('colspan', str(n_col))
         
         if self.blocks:
-            self.blocks.make_html(docx_cell)
+            self.blocks.make_html(docx_cell, **kwargs)
 
 
     def _set_style(self, table, indexes):

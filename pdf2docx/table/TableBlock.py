@@ -206,7 +206,7 @@ class TableBlock(Block):
             self._rows[idx_row].make_docx(table, idx_row)
 
 
-    def make_html(self, table):
+    def make_html(self, table, **kwargs):
         # self.clean_empty_rows_cols()
         for idx_row in range(self.num_rows):
-            self._rows[idx_row].make_html(table, idx_row)
+            self._rows[idx_row].make_html(table, idx_row, **kwargs)

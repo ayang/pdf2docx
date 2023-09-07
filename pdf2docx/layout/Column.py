@@ -72,13 +72,13 @@ class Column(Element, Layout):
         '''
         self.blocks.make_docx(doc)
 
-    def make_html(self, doc):
+    def make_html(self, doc, **kwargs):
         '''Create Section Column in html. 
 
         Args:
             doc (etree.Element): ``lxml`` Element object
         '''
-        self.blocks.make_html(doc)
+        self.blocks.make_html(doc, **kwargs)
 
 
 

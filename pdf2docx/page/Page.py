@@ -203,7 +203,7 @@ class Page(BasePage):
         self.sections.make_docx(doc)
 
  
-    def make_html(self, doc=None):
+    def make_html(self, doc=None, **kwargs):
         '''Set page size, margin, and create page. 
 
         .. note::
@@ -220,7 +220,7 @@ class Page(BasePage):
         # section = etree.SubElement(page, 'div', {'class': 'section'})
 
         # create flow layout: sections
-        self.sections.make_html(page)
+        self.sections.make_html(page, **kwargs)
         return page
 
 

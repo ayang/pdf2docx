@@ -357,7 +357,7 @@ class Blocks(ElementCollection):
             reset_paragraph_format(p, Pt(constants.MIN_LINE_SPACING)) # a small line height
 
 
-    def make_html(self, doc):
+    def make_html(self, doc, **kwargs):
         '''Create page based on parsed block structure. 
         
         Args:
@@ -366,7 +366,7 @@ class Blocks(ElementCollection):
         def make_table(table_block, pre_table):
             # new table            
             table = etree.SubElement(doc, 'table', width='100%')
-            table_block.make_html(table)
+            table_block.make_html(table, **kwargs)
 
         pre_table = False
         cell_layout = isinstance(self.parent, Cell)
@@ -374,7 +374,7 @@ class Blocks(ElementCollection):
             if doc.tag == 'td':
                 # prevent table in table
                 if block.is_text_image_block:
-                    block.make_html(doc)
+                    block.make_html(doc, **kwargs)
                     etree.SubElement(doc, 'br')
                 elif block.is_table_block:
                     etree.SubElement(doc, 'span').text = ''.join([''.join(row) for row in block.text])
@@ -384,7 +384,7 @@ class Blocks(ElementCollection):
                 if block.is_text_image_block:                
                     # new paragraph
                     p = etree.SubElement(doc, 'p')
-                    block.make_html(p)
+                    block.make_html(p, **kwargs)
 
                     pre_table = False # mark block type
                 

@@ -83,7 +83,7 @@ class Sections(BaseCollection):
             image.make_docx(doc.paragraphs[n])
 
 
-    def make_html(self, doc):
+    def make_html(self, doc, **kwargs):
         '''create sections in html.'''
         if not self: return
 
@@ -92,7 +92,7 @@ class Sections(BaseCollection):
         # ---------------------------------------------------
         for section in self:
             # section content
-            section.make_html(doc)
+            section.make_html(doc, **kwargs)
 
 
     def plot(self, page):

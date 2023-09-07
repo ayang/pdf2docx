@@ -81,5 +81,6 @@ class ImageBlock(Image, Block):
         return p
     
 
-    def make_html(self, p):
+    def make_html(self, p, **kwargs):
+        super().make_html(p, **kwargs)
         return p

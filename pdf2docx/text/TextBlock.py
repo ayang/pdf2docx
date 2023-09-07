@@ -369,8 +369,8 @@ class TextBlock(Block):
         return p
 
 
-    def make_html(self, p):
-        for line in self.lines: line.make_html(p)
+    def make_html(self, p, **kwargs):
+        for line in self.lines: line.make_html(p, **kwargs)
         styles = []
         if self.alignment==TextAlignment.LEFT:
             styles.append('text-align:left')

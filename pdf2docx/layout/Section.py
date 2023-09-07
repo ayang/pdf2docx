@@ -98,7 +98,7 @@ class Section(BaseCollection):
             column.make_docx(doc)
 
     
-    def make_html(self, doc):
+    def make_html(self, doc, **kwargs):
         '''Create section in docx. 
 
         Args:
@@ -107,4 +107,4 @@ class Section(BaseCollection):
         # create section
         section = etree.SubElement(doc, 'div', {'class': 'section'})
         for column in self:
-            column.make_html(section)
+            column.make_html(section, **kwargs)

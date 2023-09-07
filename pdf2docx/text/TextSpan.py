@@ -385,7 +385,7 @@ class TextSpan(Element):
             docx.set_char_spacing(docx_run, self.char_spacing)
 
     
-    def make_html(self, paragraph):
+    def make_html(self, paragraph, **kwargs):
         attribs = {}
         style = self._get_html_style()
         if style:

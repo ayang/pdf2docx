@@ -4,6 +4,7 @@ import logging
 import os
 from collections import Counter
 from multiprocessing import Pool, cpu_count
+from pathlib import Path
 from time import perf_counter
 from typing import AnyStr, IO, Union
 
@@ -135,6 +136,7 @@ class Converter:
             'parse_stream_table'             : True,   # whether parse stream table or not; may destroy the layout if set False
             'delete_end_line_hyphen'         : False,  # delete hyphen at the end of a line
             'template_file'                  : None,   # html template file
+            'output_image_dir'               : None,   # output image directory
         }
 
     # -----------------------------------------------------------------------
@@ -282,7 +284,7 @@ class Converter:
             pid = page.id + 1
             logging.info('(%d/%d) Page %d', i, num_pages, pid)
             try:
-                dom_pages.append(page.make_html())
+                dom_pages.append(page.make_html(**kwargs))
             except Exception as e:
                 if not kwargs['debug'] and kwargs['ignore_page_error']:
                     logging.error('Ignore page %d due to making page error: %s', pid, e)
@@ -333,6 +335,12 @@ class Converter:
         else:
             filename = html_filename or f'{self.filename_pdf[0:-len(".pdf")]}.html' if self.filename_pdf else "output.html"
             if os.path.exists(filename): os.remove(filename)
+            filepath = Path(filename)
+            if kwargs['output_image_dir'] is None:
+                kwargs['output_image_dir'] = filepath.parent / 'images'
+            else:
+                kwargs['output_image_dir'] = Path(kwargs['output_image_dir'])
+            kwargs['output_image_dir'].mkdir(parents=True, exist_ok=True)
 
         # create page by page
         page_htmls = self.make_html_pages(**kwargs)

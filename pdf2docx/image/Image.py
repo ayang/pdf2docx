@@ -20,6 +20,9 @@ Data structure defined in link https://pymupdf.readthedocs.io/en/latest/textpage
 
 import base64
 from io import BytesIO
+import hashlib
+from lxml import etree
+from PIL import Image as PILImage
 from ..common import docx
 from ..common.Element import Element
 
@@ -94,5 +97,15 @@ class Image(Element):
         docx.add_image(paragraph, BytesIO(self.image), self.bbox.x1-self.bbox.x0, self.bbox.y1-self.bbox.y0)
 
 
-    def make_html(self, paragraph):
-        pass
+    def make_html(self, paragraph, **kwargs):
+        hash = hashlib.md5(self.image).hexdigest()[:8]
+        filename = f'images/{hash}.webp'
+        filepath = kwargs['output_image_dir'] / f'{hash}.webp'
+        image = PILImage.open(BytesIO(self.image))
+        image.save(filepath, format='webp')
+        x1, y1, x2, y2 = self.bbox
+        etree.SubElement(paragraph, 'img', attrib={
+            'src': filename,
+            'width': '{}px'.format((x2-x1)*8/3),
+            'height': '{}px'.format((y2-y1)*8/3)
+        })

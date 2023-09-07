@@ -179,10 +179,10 @@ class Line(Element):
         if self.line_break: p.add_run('\n')
 
 
-    def make_html(self, p):
+    def make_html(self, p, **kwargs):
         '''Create html line.'''
         # create span -> run in paragraph
-        for span in self.spans: span.make_html(p)            
+        for span in self.spans: span.make_html(p, **kwargs)            
 
         # line break
         if self.line_break: etree.SubElement(p, 'br')
