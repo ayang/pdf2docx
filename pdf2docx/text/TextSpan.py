@@ -386,11 +386,38 @@ class TextSpan(Element):
 
     
     def make_html(self, paragraph):
-        etree.SubElement(paragraph, 'span', {'style': self._get_html_style()}).text = self.text
+        attribs = {}
+        style = self._get_html_style()
+        if style:
+            attribs['style'] = style
+        etree.SubElement(paragraph, 'span', attrib=attribs).text = self.text
 
 
     def _get_html_style(self):
-        return ''
+        superscript = bool(self.flags & 2**0)
+        italic = bool(self.flags & 2**1)
+        bold = bool(self.flags & 2**4)
+
+        # font name
+        font_name = self.font
+        color = '#' + str(RGBColor(*share.rgb_component(self.color)))
+
+        # font size
+        # NOTE: only x.0 and x.5 is accepted in docx, so set character scaling accordingly
+        # if the font size doesn't meet this condition.
+        font_size = round(self.size*2)/2.0
+        font_size_pt = Pt(font_size)
+
+        style = ''
+        if bold: style += 'font-weight: bold;'
+        if italic: style += 'font-style: italic;'
+        if superscript: style += 'vertical-align: super;'
+        # style += f'font-family: {font_name};'
+        if font_size > 12.0:
+            style += f'font-size: {font_size_pt.pt}pt;'
+        if color != '#000000':
+            style += f'color: {color};'
+        return style
 
 
     def _set_text_format(self, docx_run):
