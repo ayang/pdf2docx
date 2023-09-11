@@ -2,6 +2,7 @@
 import json
 import logging
 import os
+import re
 from collections import Counter
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
@@ -41,6 +42,12 @@ default_html_template = '''
         .pdf-page {
             margin-bottom: 1em;
             border-bottom: 1px solid black;
+        }
+        .page-number {
+            margin-bottom: 2em;
+            text-align: center;
+            font-size: 0.8em;
+            color: gray;
         }
     </style>
 </head>
@@ -295,18 +302,64 @@ class Converter:
         for i in range(3):
             header_texts = Counter()
             for page in dom_pages:
-                first_paragraph = page.find('.//p')
-                if first_paragraph is not None:
-                    text = first_paragraph.xpath("string()").strip()
+                try:
+                    first_block = page[0][0]
+                except IndexError:
+                    continue
+                if first_block is not None:
+                    text = first_block.xpath("string()").strip()
+                    text = re.sub(r'\d+', '1', text)
                     header_texts[text] += 1
 
             for text, count in header_texts.items():
-                if count >= num_pages / 2:
+                threshold = int(num_pages * 0.3) if num_pages > 10 else 3
+                if num_pages <= 3:
+                    threshold = num_pages
+                if count >= threshold:
                     for page in dom_pages:
-                        first_paragraph = page.find('.//p')
-                        if first_paragraph is not None and first_paragraph.xpath("string()").strip() == text:
-                            parent = first_paragraph.getparent()
-                            parent.remove(first_paragraph)
+                        try:
+                            first_block = page[0][0]
+                        except IndexError:
+                            continue
+                        if first_block is None:
+                            continue
+                        first_text = first_block.xpath("string()").strip()
+                        first_text = re.sub(r'\d+', '1', first_text)
+                        if first_text == text:
+                            parent = first_block.getparent()
+                            parent.remove(first_block)
+                            if parent.text is None:
+                                parent.text = ''
+
+        for i in range(3):
+            footer_texts = Counter()
+            for page in dom_pages:
+                try:
+                    last_block = page[-1][-1]
+                except IndexError:
+                    continue
+                if last_block is not None:
+                    text = last_block.xpath("string()").strip()
+                    text = re.sub(r'\d+', '1', text)
+                    footer_texts[text] += 1
+
+            for text, count in footer_texts.items():
+                threshold = int(num_pages * 0.3) if num_pages > 10 else 3
+                if num_pages <= 3:
+                    threshold = num_pages
+                if count >= threshold:
+                    for page in dom_pages:
+                        try:
+                            last_block = page[-1][-1]
+                        except IndexError:
+                            continue
+                        if last_block is None:
+                            continue
+                        first_text = last_block.xpath("string()").strip()
+                        first_text = re.sub(r'\d+', '1', first_text)
+                        if first_text == text:
+                            parent = last_block.getparent()
+                            parent.remove(last_block)
                             if parent.text is None:
                                 parent.text = ''
 
@@ -352,7 +405,11 @@ class Converter:
         else:
             template = default_html_template
 
-        html = template.replace('{{body}}', '\n'.join(page_htmls))
+        body = []
+        for i, page_html in enumerate(page_htmls):
+            body.append(page_html)
+            body.append(f'<hr/>\n<div class="page-number">第 {i+1} 页</div>')
+        html = template.replace('{{body}}', '\n'.join(body))
         if hasattr(html_filename, 'write'):
             html_filename.write(html)
         else:
