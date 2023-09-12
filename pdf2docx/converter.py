@@ -277,6 +277,9 @@ class Converter:
 
     def remove_html_header_footer(self, dom_pages, num_pages):
         # remove header and footer
+        threshold = int(num_pages * 0.4) if num_pages > 10 else 4
+        if 1 < num_pages <= 3:
+            threshold = num_pages
         for i in range(3):
             if len(dom_pages) <= 1:
                 break
@@ -326,9 +329,6 @@ class Converter:
                     footer_texts[text] += 1
 
             for text, count in footer_texts.items():
-                threshold = int(num_pages * 0.3) if num_pages > 10 else 3
-                if num_pages <= 3:
-                    threshold = num_pages
                 if count >= threshold:
                     for page in dom_pages:
                         try:

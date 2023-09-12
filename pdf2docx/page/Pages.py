@@ -96,7 +96,7 @@ class Pages(BaseCollection):
         headers = Counter()
         footers = Counter()
         num_pages = len(raw_pages)
-        threshold = int(num_pages * 0.4) if num_pages > 10 else 3
+        threshold = int(num_pages * 0.4) if num_pages > 10 else 4
         if 1 < num_pages <= 3:
             threshold = num_pages
         for page in raw_pages:
