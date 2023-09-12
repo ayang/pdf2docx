@@ -198,7 +198,7 @@ class RawPage(BasePage, Layout):
                 c1, c2 = x0-X0, X1-x0 # column width
                 w1, w2 = u1-u0, m1-m0 # line width
                 f = 2.0
-                if not 1/f<=c1/c2<=f or w1/c1<0.33 or w2/c2<0.33: 
+                if not 1/f<=c1/c2<=f or (w1/c1<0.33 or w2/c2<0.33) and max(len(cols[0]), len(cols[1])) < 3 and pre_num_col==1: 
                     current_num_col = 1
 
             # process exceptions
@@ -206,8 +206,8 @@ class RawPage(BasePage, Layout):
                 # though current row has one single column, it might have another virtual 
                 # and empty column. If so, it should be counted as 2-cols
                 cols = lines.group_by_columns()
-                pos = cols[0].bbox[2]
-                if row.bbox[2]<=pos or row.bbox[0]>pos:
+                pos = (cols[0].bbox[2] + cols[1].bbox[0]) / 2
+                if row.bbox[2]<=pos and row.bbox[2]>=cols[0].bbox[0] or row.bbox[0]>pos and row.bbox[0]<=cols[1].bbox[2]:
                     current_num_col = 2
                 
                 # pre_num_col!=current_num_col => to close section with collected lines,

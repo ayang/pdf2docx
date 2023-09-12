@@ -300,6 +300,8 @@ class Converter:
 
         # remove header and footer
         for i in range(3):
+            if len(dom_pages) <= 1:
+                break
             header_texts = Counter()
             for page in dom_pages:
                 try:
@@ -332,6 +334,8 @@ class Converter:
                                 parent.text = ''
 
         for i in range(3):
+            if len(dom_pages) <= 1:
+                break
             footer_texts = Counter()
             for page in dom_pages:
                 try:
