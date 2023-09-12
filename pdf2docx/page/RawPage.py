@@ -153,12 +153,16 @@ class RawPage(BasePage, Layout):
             - Page margin must be parsed before this step.
         '''
         # bbox
-        X0, Y0, X1, _ = self.working_bbox
+        X0, Y0, X1, Y1 = self.working_bbox
+        if not hasattr(self, 'header'): self.header = Y0
+        if not hasattr(self, 'footer'): self.footer = Y1
     
         # collect all blocks (line level) and shapes
         elements = Collection()
         elements.extend(self.blocks)
         elements.extend(self.shapes)
+        if settings.get('remove_header_footer', True):
+            elements = Collection(filter(lambda e: e.bbox[1]>=self.header and e.bbox[3]<=self.footer, elements))
         if not elements: return
 
         # to create section with collected lines        

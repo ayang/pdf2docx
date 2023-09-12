@@ -2,10 +2,12 @@
 
 '''Collection of :py:class:`~pdf2docx.page.Page` instances.'''
 
+from collections import Counter
+import re
 import logging
 
 from .RawPageFactory import RawPageFactory
-from ..common.Collection import BaseCollection
+from ..common.Collection import BaseCollection, Collection
 from ..font.Fonts import Fonts
 
 
@@ -66,7 +68,7 @@ class Pages(BaseCollection):
         # NOTE: blocks structure might be changed in this step, e.g. promote page header/footer,
         # so blocks structure based process, e.g. calculating margin, parse section should be 
         # run after this step.
-        header, footer = Pages._parse_document(raw_pages)
+        Pages._parse_document(raw_pages)
 
 
         # ---------------------------------------------
@@ -86,5 +88,51 @@ class Pages(BaseCollection):
     @staticmethod
     def _parse_document(raw_pages:list):
         '''Parse structure in document/pages level, e.g. header, footer'''
-        # TODO
-        return '', ''
+        Pages._parse_header_footer(raw_pages)
+
+
+    @staticmethod
+    def _parse_header_footer(raw_pages:list):
+        headers = Counter()
+        footers = Counter()
+        num_pages = len(raw_pages)
+        threshold = int(num_pages * 0.4) if num_pages > 10 else 3
+        if 1 < num_pages <= 3:
+            threshold = num_pages
+        for page in raw_pages:
+            elements = Collection()
+            elements.extend(page.blocks)
+            # elements.extend(page.shapes)
+            if not elements: continue
+            blocks = page.blocks.sort_in_reading_order()
+            for i in range(3):
+                if i < len(blocks) and blocks[i].text is not None:
+                    block = blocks[i]
+                    text = re.sub(r'\d+', '1', block.text.strip())
+                    headers[text] += 1
+                if i <= len(blocks) and blocks[-(i+1)].text is not None:
+                    block = blocks[-(i+1)]
+                    text = re.sub(r'\d+', '1', block.text.strip())
+                    footers[text] += 1
+
+        for page in raw_pages:
+            elements = Collection()
+            elements.extend(page.blocks)
+            # elements.extend(page.shapes)
+            if not elements: continue
+            blocks = page.blocks.sort_in_reading_order()
+            header_blocks = []
+            footer_blocks = []
+            for i in range(3):
+                if i < len(blocks) and blocks[i].text is not None:
+                    block = blocks[i]
+                    text = re.sub(r'\d+', '1', block.text.strip())
+                    if headers[text] > threshold:
+                        header_blocks.append(block)
+                if i <= len(blocks) and blocks[-(i+1)].text is not None:
+                    block = blocks[-(i+1)]
+                    text = re.sub(r'\d+', '1', block.text.strip())
+                    if footers[text] > threshold:
+                        footer_blocks.append(block)
+            page.header = max([b.bbox[3] for b in header_blocks], default=0)
+            page.footer = min([b.bbox[1] for b in footer_blocks], default=page.bbox[3])

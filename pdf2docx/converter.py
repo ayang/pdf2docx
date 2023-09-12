@@ -142,6 +142,7 @@ class Converter:
             'parse_lattice_table'            : True,   # whether parse lattice table or not; may destroy the layout if set False
             'parse_stream_table'             : True,   # whether parse stream table or not; may destroy the layout if set False
             'delete_end_line_hyphen'         : False,  # delete hyphen at the end of a line
+            'remove_header_footer'           : False,  # remove header and footer if True
             'template_file'                  : None,   # html template file
             'output_image_dir'               : None,   # output image directory
         }
@@ -274,30 +275,7 @@ class Converter:
         # save docx
         docx_file.save(filename)
 
-
-    def make_html_pages(self, **kwargs):
-        # check parsed pages
-        parsed_pages = list(filter(
-            lambda page: page.finalized, self._pages
-        ))
-        if not parsed_pages:
-            raise ConversionException('No parsed pages. Please parse page first.')
-
-        # create page by page        
-        num_pages = len(parsed_pages)
-        dom_pages = []
-        for i, page in enumerate(parsed_pages, start=1):
-            if not page.finalized: continue # ignore unparsed pages
-            pid = page.id + 1
-            logging.info('(%d/%d) Page %d', i, num_pages, pid)
-            try:
-                dom_pages.append(page.make_html(**kwargs))
-            except Exception as e:
-                if not kwargs['debug'] and kwargs['ignore_page_error']:
-                    logging.error('Ignore page %d due to making page error: %s', pid, e)
-                else:
-                    raise MakedocxException(f'Error when make page {pid}: {e}')
-
+    def remove_html_header_footer(self, dom_pages, num_pages):
         # remove header and footer
         for i in range(3):
             if len(dom_pages) <= 1:
@@ -367,6 +345,31 @@ class Converter:
                             if parent.text is None:
                                 parent.text = ''
 
+
+    def make_html_pages(self, **kwargs):
+        # check parsed pages
+        parsed_pages = list(filter(
+            lambda page: page.finalized, self._pages
+        ))
+        if not parsed_pages:
+            raise ConversionException('No parsed pages. Please parse page first.')
+
+        # create page by page        
+        num_pages = len(parsed_pages)
+        dom_pages = []
+        for i, page in enumerate(parsed_pages, start=1):
+            if not page.finalized: continue # ignore unparsed pages
+            pid = page.id + 1
+            logging.info('(%d/%d) Page %d', i, num_pages, pid)
+            try:
+                dom_pages.append(page.make_html(**kwargs))
+            except Exception as e:
+                if not kwargs['debug'] and kwargs['ignore_page_error']:
+                    logging.error('Ignore page %d due to making page error: %s', pid, e)
+                else:
+                    raise MakedocxException(f'Error when make page {pid}: {e}')
+        if kwargs.get('remove_header_footer', True):
+            self.remove_html_header_footer(dom_pages, num_pages)
         page_htmls = [etree.tostring(page, pretty_print=True, encoding='unicode') for page in dom_pages]
         return page_htmls
 
