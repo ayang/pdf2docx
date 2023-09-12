@@ -110,7 +110,7 @@ class Pages(BaseCollection):
                     block = blocks[i]
                     text = re.sub(r'\d+', '1', block.text.strip())
                     headers[text] += 1
-                if i <= len(blocks) and blocks[-(i+1)].text is not None:
+                if i < len(blocks) and blocks[-(i+1)].text is not None:
                     block = blocks[-(i+1)]
                     text = re.sub(r'\d+', '1', block.text.strip())
                     footers[text] += 1
@@ -129,7 +129,7 @@ class Pages(BaseCollection):
                     text = re.sub(r'\d+', '1', block.text.strip())
                     if headers[text] > threshold:
                         header_blocks.append(block)
-                if i <= len(blocks) and blocks[-(i+1)].text is not None:
+                if i < len(blocks) and blocks[-(i+1)].text is not None:
                     block = blocks[-(i+1)]
                     text = re.sub(r'\d+', '1', block.text.strip())
                     if footers[text] > threshold:
